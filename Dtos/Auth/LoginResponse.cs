@@ -1,5 +1,6 @@
-namespace FulfillmentInventoryPlatform.Dtos.Auth;
+using FulfillmentInventoryPlatform.API.Dtos.User;
 
+namespace FulfillmentInventoryPlatform.API.Dtos.Auth;
 
 public class LoginResponse
 {

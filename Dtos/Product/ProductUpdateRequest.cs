@@ -1,13 +1,18 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace FulfillmentInventoryPlatform.API.Dtos.Product;
 
-public class ProductResponse
+public class ProductUpdateRequest
 {
-    public int Id { get; set; }
+    [Required, MaxLength(200)]
     public string Name { get; set; } = string.Empty;
+
+    [MaxLength(1000)]
     public string Description { get; set; } = string.Empty;
+
+    [Required, MaxLength(50)]
     public string SKU { get; set; } = string.Empty;
+
+    [Required]
     public int CategoryId { get; set; }
-    public string CategoryName { get; set; } = string.Empty;
-    public bool IsDeleted { get; set; }
-    public DateTime CreatedAt { get; set; }
 }
