@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FulfillmentInventoryPlatform.Models;
-
+namespace FulfillmentInventoryPlatform.API.Models;
 
 public class StockItem
 {
@@ -14,7 +13,6 @@ public class StockItem
     public int Quantity { get; set; }
 
     public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
-
 
     public Product Product { get; set; } = null!;
 

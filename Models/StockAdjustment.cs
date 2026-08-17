@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FulfillmentInventoryPlatform.Models;
-
+namespace FulfillmentInventoryPlatform.API.Models;
 
 public class StockAdjustment
 {
@@ -15,14 +14,15 @@ public class StockAdjustment
 
     public int QuantityDelta { get; set; }
 
+    [Required, MaxLength(50)]
     public string AdjustmentType { get; set; } = "Other";
 
+    [MaxLength(500)]
     public string? Note { get; set; }
 
     public int PerformedByUserId { get; set; }
 
     public DateTime PerformedAt { get; set; } = DateTime.UtcNow;
-
 
     public StockItem StockItem { get; set; } = null!;
 

@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FulfillmentInventoryPlatform.Models;
-
+namespace FulfillmentInventoryPlatform.API.Models;
 
 public class Product
 {
@@ -21,7 +20,6 @@ public class Product
     public bool IsDeleted { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
 
     public Category Category { get; set; } = null!;
 

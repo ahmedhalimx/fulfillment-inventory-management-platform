@@ -1,12 +1,10 @@
-namespace FulfillmentInventoryPlatform.Models;
-
+namespace FulfillmentInventoryPlatform.API.Models;
 
 public class UserWarehouse
 {
     public int UserId { get; set; }
 
     public int WarehouseId { get; set; }
-
 
     public User User { get; set; } = null!;
 
