@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using FulfillmentInventoryPlatform.API.Enums;
 
 namespace FulfillmentInventoryPlatform.API.Models;
 
@@ -19,7 +20,7 @@ public class User
     public string FullName { get; set; } = string.Empty;
 
     [Required]
-    public string Role { get; set; } = "Operator";
+    public UserRole Role { get; set; } = UserRole.Operator;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

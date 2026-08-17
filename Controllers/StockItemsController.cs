@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FulfillmentInventoryPlatform.API.Dtos.Common;
 using FulfillmentInventoryPlatform.API.Dtos.Stock;
+using FulfillmentInventoryPlatform.API.Enums;
 using FulfillmentInventoryPlatform.API.Services;
 
 namespace FulfillmentInventoryPlatform.API.Controllers;
@@ -40,7 +41,7 @@ public class StockItemsController : ControllerBase
         return Ok(result);
     }
 
-    private (int UserId, string Role) GetUserContext()
+    private (int UserId, UserRole Role) GetUserContext()
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var roleClaim = User.FindFirstValue(ClaimTypes.Role);
@@ -48,6 +49,7 @@ public class StockItemsController : ControllerBase
         if (!int.TryParse(userIdClaim, out int userId))
             throw new UnauthorizedAccessException("Invalid user identity claim.");
 
-        return (userId, roleClaim ?? "Operator");
+        Enum.TryParse<UserRole>(roleClaim, true, out var role);
+        return (userId, role);
     }
 }

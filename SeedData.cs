@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
+using FulfillmentInventoryPlatform.API.Enums;
 using FulfillmentInventoryPlatform.API.Models;
 
 namespace FulfillmentInventoryPlatform.API.Data;
@@ -45,7 +46,7 @@ public static class SeedData
 
         // Add stock items for each product in each warehouse
         var stockItems = new List<StockItem>();
-        var rnd = new Random(42); // deterministic seed
+        var rnd = new Random(42);
         foreach (var product in products)
         {
             foreach (var warehouse in warehouses)
@@ -62,7 +63,7 @@ public static class SeedData
         await context.StockItems.AddRangeAsync(stockItems);
         await context.SaveChangesAsync();
 
-        // Create users
+        // Create users with UserRole enum
         var adminPassword = BCrypt.Net.BCrypt.HashPassword("Admin@123");
         var managerPassword = BCrypt.Net.BCrypt.HashPassword("Manager@123");
         var operatorPassword = BCrypt.Net.BCrypt.HashPassword("Operator@123");
@@ -73,7 +74,7 @@ public static class SeedData
             Email = "admin@test.com",
             PasswordHash = adminPassword,
             FullName = "Admin User",
-            Role = "Admin",
+            Role = UserRole.Admin,
             CreatedAt = DateTime.UtcNow
         };
         var manager = new User
@@ -82,7 +83,7 @@ public static class SeedData
             Email = "manager@test.com",
             PasswordHash = managerPassword,
             FullName = "Manager User",
-            Role = "Manager",
+            Role = UserRole.Manager,
             CreatedAt = DateTime.UtcNow
         };
         var operator1 = new User
@@ -91,7 +92,7 @@ public static class SeedData
             Email = "operator1@test.com",
             PasswordHash = operatorPassword,
             FullName = "Operator One",
-            Role = "Operator",
+            Role = UserRole.Operator,
             CreatedAt = DateTime.UtcNow
         };
         var operator2 = new User
@@ -100,7 +101,7 @@ public static class SeedData
             Email = "operator2@test.com",
             PasswordHash = operatorPassword,
             FullName = "Operator Two",
-            Role = "Operator",
+            Role = UserRole.Operator,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -117,7 +118,7 @@ public static class SeedData
         await context.UserWarehouses.AddRangeAsync(userWarehouses);
         await context.SaveChangesAsync();
 
-        // Add initial stock adjustments for history
+        // Add initial stock adjustments for history with AdjustmentType enum
         var adjustments = new List<StockAdjustment>();
         var stockItemList = await context.StockItems.ToListAsync();
         foreach (var si in stockItemList.Take(10))
@@ -129,7 +130,7 @@ public static class SeedData
                 PreviousQuantity = 0,
                 NewQuantity = initialQty,
                 QuantityDelta = initialQty,
-                AdjustmentType = "Receive",
+                AdjustmentType = AdjustmentType.Receive,
                 Note = "Initial seed inventory intake",
                 PerformedByUserId = admin.Id,
                 PerformedAt = DateTime.UtcNow.AddDays(-1)

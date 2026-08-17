@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using FulfillmentInventoryPlatform.API.Enums;
 using FulfillmentInventoryPlatform.API.Models;
 
 namespace FulfillmentInventoryPlatform.API.Data;
@@ -18,6 +19,15 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // Enum string conversions for DB storage readability
+        modelBuilder.Entity<User>()
+            .Property(u => u.Role)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<StockAdjustment>()
+            .Property(sa => sa.AdjustmentType)
+            .HasConversion<string>();
 
         // UserWarehouse composite key & relationships
         modelBuilder.Entity<UserWarehouse>()

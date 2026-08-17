@@ -3,6 +3,7 @@ using BCrypt.Net;
 using FulfillmentInventoryPlatform.API.Data;
 using FulfillmentInventoryPlatform.API.Dtos.Auth;
 using FulfillmentInventoryPlatform.API.Dtos.User;
+using FulfillmentInventoryPlatform.API.Enums;
 using FulfillmentInventoryPlatform.API.Models;
 
 namespace FulfillmentInventoryPlatform.API.Services;
@@ -24,16 +25,13 @@ public class UserService : IUserService
         if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             throw new InvalidOperationException("Email is already registered.");
 
-        var validRoles = new[] { "Admin", "Manager", "Operator" };
-        var role = validRoles.Contains(request.Role, StringComparer.OrdinalIgnoreCase) ? request.Role : "Operator";
-
         var user = new User
         {
             Username = request.Username,
             Email = request.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             FullName = request.FullName,
-            Role = role,
+            Role = request.Role,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -64,12 +62,8 @@ public class UserService : IUserService
         return users.Select(MapToDto).ToList();
     }
 
-    public async Task<UserDto> UpdateRoleAsync(int userId, string newRole)
+    public async Task<UserDto> UpdateRoleAsync(int userId, UserRole newRole)
     {
-        var validRoles = new[] { "Admin", "Manager", "Operator" };
-        if (!validRoles.Contains(newRole, StringComparer.OrdinalIgnoreCase))
-            throw new InvalidOperationException($"Invalid role '{newRole}'. Valid roles: Admin, Manager, Operator.");
-
         var user = await _context.Users
             .Include(u => u.UserWarehouses)
             .FirstOrDefaultAsync(u => u.Id == userId);
@@ -101,7 +95,6 @@ public class UserService : IUserService
         if (existingWarehouses.Count != warehouseIds.Distinct().Count())
             throw new InvalidOperationException("One or more warehouse IDs are invalid or deleted.");
 
-        // Clear existing assignments and add new ones
         _context.UserWarehouses.RemoveRange(user.UserWarehouses);
         foreach (var wId in warehouseIds.Distinct())
         {

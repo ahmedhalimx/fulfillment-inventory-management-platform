@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using FulfillmentInventoryPlatform.API.Data;
 using FulfillmentInventoryPlatform.API.Dtos.Stock;
+using FulfillmentInventoryPlatform.API.Enums;
 using FulfillmentInventoryPlatform.API.Models;
 using FulfillmentInventoryPlatform.API.Services;
 using Xunit;
@@ -31,7 +32,7 @@ public class StockServiceTests
 
         var product = new Product { Id = 1, Name = "Laptop", SKU = "LP-001" };
         var warehouse = new Warehouse { Id = 1, Name = "Main Warehouse" };
-        var user = new User { Id = 1, Username = "admin", Role = "Admin" };
+        var user = new User { Id = 1, Username = "admin", Role = UserRole.Admin };
 
         db.Products.Add(product);
         db.Warehouses.Add(warehouse);
@@ -43,12 +44,12 @@ public class StockServiceTests
             ProductId = 1,
             WarehouseId = 1,
             Delta = 10,
-            AdjustmentType = "Receive",
+            AdjustmentType = AdjustmentType.Receive,
             Note = "Initial stock intake"
         };
 
         // Act
-        var result = await stockService.AdjustStockAsync(request, currentUserId: 1, currentUserRole: "Admin");
+        var result = await stockService.AdjustStockAsync(request, currentUserId: 1, currentUserRole: UserRole.Admin);
 
         // Assert
         Assert.Equal(10, result.NewQuantity);
@@ -63,6 +64,7 @@ public class StockServiceTests
         Assert.NotNull(adjustment);
         Assert.Equal(0, adjustment.PreviousQuantity);
         Assert.Equal(10, adjustment.NewQuantity);
+        Assert.Equal(AdjustmentType.Receive, adjustment.AdjustmentType);
     }
 
     [Fact]
@@ -85,12 +87,12 @@ public class StockServiceTests
             ProductId = 1,
             WarehouseId = 1,
             Delta = -10,
-            AdjustmentType = "Ship"
+            AdjustmentType = AdjustmentType.Ship
         };
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            stockService.AdjustStockAsync(request, currentUserId: 1, currentUserRole: "Admin"));
+            stockService.AdjustStockAsync(request, currentUserId: 1, currentUserRole: UserRole.Admin));
 
         Assert.Contains("cannot drop below 0", ex.Message);
     }
@@ -114,12 +116,12 @@ public class StockServiceTests
             ProductId = 1,
             WarehouseId = 1,
             Delta = 5,
-            AdjustmentType = "Receive"
+            AdjustmentType = AdjustmentType.Receive
         };
 
         // Act & Assert
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            stockService.AdjustStockAsync(request, currentUserId: 1, currentUserRole: "Admin"));
+            stockService.AdjustStockAsync(request, currentUserId: 1, currentUserRole: UserRole.Admin));
 
         Assert.Contains("soft-deleted product", ex.Message);
     }
@@ -134,7 +136,7 @@ public class StockServiceTests
 
         var product = new Product { Id = 1, Name = "Item", SKU = "ITM-001" };
         var warehouse = new Warehouse { Id = 1, Name = "Restricted Warehouse" };
-        var operatorUser = new User { Id = 2, Username = "operator1", Role = "Operator" };
+        var operatorUser = new User { Id = 2, Username = "operator1", Role = UserRole.Operator };
 
         db.Products.Add(product);
         db.Warehouses.Add(warehouse);
@@ -150,6 +152,6 @@ public class StockServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            stockService.AdjustStockAsync(request, currentUserId: 2, currentUserRole: "Operator"));
+            stockService.AdjustStockAsync(request, currentUserId: 2, currentUserRole: UserRole.Operator));
     }
 }

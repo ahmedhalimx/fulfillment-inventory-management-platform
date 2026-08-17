@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using FulfillmentInventoryPlatform.API.Enums;
 
 namespace FulfillmentInventoryPlatform.API.Dtos.User;
 
 public class UserRoleUpdateRequest
 {
     [Required]
-    public string Role { get; set; } = string.Empty;
+    public UserRole Role { get; set; }
 }

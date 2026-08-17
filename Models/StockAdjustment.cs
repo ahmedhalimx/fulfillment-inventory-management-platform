@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using FulfillmentInventoryPlatform.API.Enums;
 
 namespace FulfillmentInventoryPlatform.API.Models;
 
@@ -14,8 +15,8 @@ public class StockAdjustment
 
     public int QuantityDelta { get; set; }
 
-    [Required, MaxLength(50)]
-    public string AdjustmentType { get; set; } = "Other";
+    [Required]
+    public AdjustmentType AdjustmentType { get; set; } = AdjustmentType.Other;
 
     [MaxLength(500)]
     public string? Note { get; set; }

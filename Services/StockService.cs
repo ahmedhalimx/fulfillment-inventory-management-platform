@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using FulfillmentInventoryPlatform.API.Data;
 using FulfillmentInventoryPlatform.API.Dtos.Common;
 using FulfillmentInventoryPlatform.API.Dtos.Stock;
+using FulfillmentInventoryPlatform.API.Enums;
 using FulfillmentInventoryPlatform.API.Models;
 
 namespace FulfillmentInventoryPlatform.API.Services;
@@ -23,7 +24,7 @@ public class StockService : IStockService
         int? productId,
         int? warehouseId,
         int currentUserId,
-        string currentUserRole)
+        UserRole currentUserRole)
     {
         page = Math.Max(1, page);
         size = Math.Clamp(size, 1, 100);
@@ -34,7 +35,7 @@ public class StockService : IStockService
             .AsQueryable();
 
         // RBAC filtering
-        if (string.Equals(currentUserRole, "Operator", StringComparison.OrdinalIgnoreCase))
+        if (currentUserRole == UserRole.Operator)
         {
             var assignedWarehouseIds = await _context.UserWarehouses
                 .Where(uw => uw.UserId == currentUserId)
@@ -80,10 +81,9 @@ public class StockService : IStockService
     public async Task<StockAdjustmentResponse> AdjustStockAsync(
         StockAdjustmentRequest request,
         int currentUserId,
-        string currentUserRole)
+        UserRole currentUserRole)
     {
-        // 1. Authorization check (Only Admin or assigned Operator can adjust stock)
-        if (string.Equals(currentUserRole, "Manager", StringComparison.OrdinalIgnoreCase))
+        if (currentUserRole == UserRole.Manager)
         {
             throw new UnauthorizedAccessException("Managers are not authorized to perform stock adjustments.");
         }
@@ -94,13 +94,11 @@ public class StockService : IStockService
             throw new UnauthorizedAccessException($"User is not authorized to adjust stock in warehouse ID {request.WarehouseId}.");
         }
 
-        // 2. Validate input parameters
         if (!request.Delta.HasValue && !request.NewQuantity.HasValue)
         {
             throw new ArgumentException("Either 'delta' or 'newQuantity' must be provided.");
         }
 
-        // 3. Verify product and warehouse exist and check soft-delete state
         var product = await _context.Products
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(p => p.Id == request.ProductId);
@@ -123,9 +121,7 @@ public class StockService : IStockService
             throw new KeyNotFoundException($"Active warehouse with ID {request.WarehouseId} not found.");
         }
 
-        // Use DB Transaction to ensure atomic update of stock item and creation of stock adjustment log
         var executionStrategy = _context.Database.CreateExecutionStrategy();
-
         StockAdjustment adjustment = null!;
 
         await executionStrategy.ExecuteAsync(async () =>
@@ -177,7 +173,7 @@ public class StockService : IStockService
                 PreviousQuantity = prevQty,
                 NewQuantity = newQty,
                 QuantityDelta = delta,
-                AdjustmentType = string.IsNullOrWhiteSpace(request.AdjustmentType) ? "Other" : request.AdjustmentType,
+                AdjustmentType = request.AdjustmentType,
                 Note = request.Note,
                 PerformedByUserId = currentUserId,
                 PerformedAt = DateTime.UtcNow
@@ -220,7 +216,7 @@ public class StockService : IStockService
         DateTime? to,
         int? performedByUserId,
         int currentUserId,
-        string currentUserRole)
+        UserRole currentUserRole)
     {
         page = Math.Max(1, page);
         size = Math.Clamp(size, 1, 100);
@@ -231,11 +227,11 @@ public class StockService : IStockService
             .Include(sa => sa.StockItem)
                 .ThenInclude(si => si.Warehouse)
             .Include(sa => sa.PerformedBy)
-            .IgnoreQueryFilters() // Ignore query filters to keep soft-deleted products/warehouses legible in history
+            .IgnoreQueryFilters()
             .AsQueryable();
 
         // RBAC filtering
-        if (string.Equals(currentUserRole, "Operator", StringComparison.OrdinalIgnoreCase))
+        if (currentUserRole == UserRole.Operator)
         {
             var assignedWarehouseIds = await _context.UserWarehouses
                 .Where(uw => uw.UserId == currentUserId)

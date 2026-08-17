@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using FulfillmentInventoryPlatform.API.Enums;
 
 namespace FulfillmentInventoryPlatform.API.Dtos.Auth;
 
@@ -16,5 +17,5 @@ public class RegisterRequest
     [Required, MaxLength(100)]
     public string FullName { get; set; } = string.Empty;
 
-    public string Role { get; set; } = "Operator";
+    public UserRole Role { get; set; } = UserRole.Operator;
 }

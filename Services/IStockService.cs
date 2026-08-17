@@ -1,5 +1,6 @@
 using FulfillmentInventoryPlatform.API.Dtos.Common;
 using FulfillmentInventoryPlatform.API.Dtos.Stock;
+using FulfillmentInventoryPlatform.API.Enums;
 
 namespace FulfillmentInventoryPlatform.API.Services;
 
@@ -11,12 +12,12 @@ public interface IStockService
         int? productId,
         int? warehouseId,
         int currentUserId,
-        string currentUserRole);
+        UserRole currentUserRole);
 
     Task<StockAdjustmentResponse> AdjustStockAsync(
         StockAdjustmentRequest request,
         int currentUserId,
-        string currentUserRole);
+        UserRole currentUserRole);
 
     Task<PagedResult<StockAdjustmentResponse>> GetStockAdjustmentsPagedAsync(
         int page,
@@ -27,5 +28,5 @@ public interface IStockService
         DateTime? to,
         int? performedByUserId,
         int currentUserId,
-        string currentUserRole);
+        UserRole currentUserRole);
 }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using FulfillmentInventoryPlatform.API.Enums;
 
 namespace FulfillmentInventoryPlatform.API.Dtos.Stock;
 
@@ -15,7 +16,7 @@ public class StockAdjustmentRequest
     public int? NewQuantity { get; set; }
 
     [Required]
-    public string AdjustmentType { get; set; } = "Other"; // Receive, Ship, Damaged, Correction, Other
+    public AdjustmentType AdjustmentType { get; set; } = AdjustmentType.Other;
 
     public string? Note { get; set; }
 }
